@@ -5,49 +5,51 @@
 4) Make product attractive
 */
 
-$(document).ready(function(){
+$(document).ready(function() {
   var $body = $('body');
-  var current = streams.home;
   var visitor = 'anonymous';
-  $body.append('<div class="tweetcontainer"></div>');
-  $tweetcontainer = $('.tweetcontainer');
+  var current = streams.home;
+  var $tweetcontainer = $('<div class="tweetcontainer"></div>');
+  $body.append($tweetcontainer);
 
-  $('.refresh').click(function() {
-    displayTweets(current);
-  });
-
-
-  // Show the user new tweets
-  function displayTweets(stream) {
-    $('.tweetcontainer').empty();
+  function displayTweets() {
+    $tweetcontainer.empty();
     var index = current.length - 1;
-    while(index >= 0){
+    while(index >= 0) {
       var tweet = current[index];
       var $tweet = $('<div class="tweet"></div>');
-      var dateMoment = moment(tweet.created_at);
-      // Adds tweet with timestamp
-      $tweet.html('<div class="tweetusername">@' + tweet.user + '</div><div class="date">'+ dateMoment.format("M/DD/YY") + '</div><div class="timesince">' + dateMoment.fromNow() + '</div><div class="tweetmessage"> ' + tweet.message + '</div>');
+      var date = moment(tweet.created_at);
+      $tweet.html('<div class="username">@' + tweet.user + '</div><div class="date">'+ date.format("M/DD/YY") + '</div><div class="timeago">' + date.fromNow() + '</div><div class="tweetmessage"> ' + tweet.message + '</div>');
       $tweet.appendTo($tweetcontainer);
       index -= 1;
     }
-
-    // Event listener that allows us to click on a username and see their timeline
-    $('.tweetusername').click(function(){
-      var username = $(this).text();
-      $tweetcontainer.empty();
-      // reset current to display only one user's tweets
-      current = streams.users[username];
-      displayTweets(current);
-    });
   }
   displayTweets(streams.home);
 
-  // Event listener to bring back the main stream
-  $('.header').click(function(){
+  $('.refresh').click(function() {
     $tweetcontainer.empty();
-    // reset current to display main stream
     current = streams.home;
     displayTweets(current);
+  });
+
+  $('.username').click(function() {
+    var username = $(this).text().substring(1);
+    $tweetcontainer.empty();
+    current = streams.users[username];
+    displayTweets(current);
+  });
+
+  $('.sendtweet').on('click', function() {
+    var message = $('.newtweettext').val();
+    writeTweet(message);
+    displayTweets(streams.home);
+  });
+
+  $('.tweet').submit(function(event) {
+    var message = $('.newtweettext').val();
+    writeTweet(message);
+    displayTweets(streams.home);
+    return false;
   });
 
 });
